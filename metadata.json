@@ -1,0 +1,6 @@
+{
+  "name": "Emotion Check-in",
+  "description": "Оқушының сабақ алдындағы эмоционалдық күйін 60 секундта анықтау және педагогикалық қолдау әдісі (5 деңгейлі карта және мұғалім әрекетінің алгоритмі)",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
