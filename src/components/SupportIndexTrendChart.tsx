@@ -26,21 +26,32 @@ import { SchoolClass, CheckInSession } from '../types';
 interface SupportIndexTrendChartProps {
   classes: SchoolClass[];
   sessions: CheckInSession[];
+  selectedClassId?: string;
 }
 
 export const SupportIndexTrendChart: React.FC<SupportIndexTrendChartProps> = ({
   classes,
-  sessions
+  sessions,
+  selectedClassId
 }) => {
   const [metricView, setMetricView] = useState<'overall' | 'before_after' | 'stress'>('overall');
 
-  // Single test class: 9 «А» сыныбы (20 real students)
-  const currentClass = classes[0] || { name: '9 «А» сыныбы', studentCount: 20, subject: 'Информатика' };
+  // Dynamically resolve active class (selected class, first class, or fallback)
+  const currentClass = (selectedClassId && selectedClassId !== 'all'
+    ? classes.find((c) => c.id === selectedClassId)
+    : null) || classes[0] || { name: 'Сынып', studentCount: 0, subject: 'Пән' };
 
-  // 30-day longitudinal trend data points for 9 «А» сыныбы (Sept 1 to Sept 30, 2026)
+  const currentClassName = currentClass.name || 'Сынып';
+  const studentCount = currentClass.studentCount || 0;
+
+  // 30-day longitudinal trend data points for active class
   const longitudinalData = useMemo(() => {
-    const activeInit = sessions.find((s) => s.type === 'initial');
-    const activeRecheck = sessions.find((s) => s.type === 'recheck');
+    const classSessions = selectedClassId && selectedClassId !== 'all'
+      ? sessions.filter((s) => s.classId === selectedClassId)
+      : sessions;
+
+    const activeInit = classSessions.find((s) => s.type === 'initial') || sessions.find((s) => s.type === 'initial');
+    const activeRecheck = classSessions.find((s) => s.type === 'recheck') || sessions.find((s) => s.type === 'recheck');
 
     const livePre = activeInit ? activeInit.supportIndex : 77.5;
     const livePost = activeRecheck ? activeRecheck.supportIndex : 92.3;
@@ -51,15 +62,15 @@ export const SupportIndexTrendChart: React.FC<SupportIndexTrendChartProps> = ({
     const liveReadiness = activeRecheck?.averageLevel || activeInit?.averageLevel || 4.1;
 
     return [
-      { date: '01 қыр', day: 1, preLesson: 68, postLesson: 76, avgIndex: 72.0, stressPct: 15, readiness: 3.4, note: '9 «А» оқу жылының басы, бейімделу' },
-      { date: '05 қыр', day: 5, preLesson: 70, postLesson: 79, avgIndex: 74.5, stressPct: 14, readiness: 3.5, note: 'Check-in енгізілді (20 оқушы)' },
+      { date: '01 қыр', day: 1, preLesson: 68, postLesson: 76, avgIndex: 72.0, stressPct: 15, readiness: 3.4, note: `${currentClassName} оқу жылының басы, бейімделу` },
+      { date: '05 қыр', day: 5, preLesson: 70, postLesson: 79, avgIndex: 74.5, stressPct: 14, readiness: 3.5, note: `${currentClassName}: Check-in енгізілді (${studentCount} оқушы)` },
       { date: '10 қыр', day: 10, preLesson: 69, postLesson: 82, avgIndex: 75.5, stressPct: 12, readiness: 3.6, note: '«4-7-8» тыныс алу сергітуі' },
       { date: '15 қыр', day: 15, preLesson: 72, postLesson: 85, avgIndex: 78.5, stressPct: 10, readiness: 3.8, note: 'Ми гимнастикасы енгізілді' },
       { date: '20 қыр', day: 20, preLesson: 74, postLesson: 88, avgIndex: 81.0, stressPct: 8, readiness: 3.9, note: 'Жұптық қолдау (Peer buddy)' },
       { date: '25 қыр', day: 25, preLesson: 76, postLesson: 90, avgIndex: 83.0, stressPct: 5, readiness: 4.1, note: 'Практикалық зерттеу сабағы' },
-      { date: '30 қыр', day: 30, preLesson: livePre, postLesson: livePost, avgIndex: liveAvg, stressPct: liveStress, readiness: liveReadiness, note: '9 «А» ағымдағы нақты сессия деректері' },
+      { date: '30 қыр', day: 30, preLesson: livePre, postLesson: livePost, avgIndex: liveAvg, stressPct: liveStress, readiness: liveReadiness, note: `${currentClassName} ағымдағы нақты сессия деректері` },
     ];
-  }, [sessions]);
+  }, [sessions, selectedClassId, currentClassName, studentCount]);
 
   // Custom Recharts Tooltip matching school portal design
   const CustomTooltip = ({ active, payload, label }: any) => {

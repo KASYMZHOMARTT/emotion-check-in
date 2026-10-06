@@ -21,13 +21,13 @@ import { AuthView } from './components/AuthView';
 import { SmartGroupingModal } from './components/SmartGroupingModal';
 import { OfficialReportModal } from './components/OfficialReportModal';
 import { api, authStorage } from './services/api';
-import { 
-  BootstrapData, 
-  CheckInSession, 
-  SchoolClass, 
-  Student, 
-  CheckInRecord, 
-  AppNotification, 
+import {
+  BootstrapData,
+  CheckInSession,
+  SchoolClass,
+  Student,
+  CheckInRecord,
+  AppNotification,
   EmotionLevelConfig,
   Teacher
 } from './types';
@@ -55,7 +55,8 @@ export default function App() {
   const [showOfficialReportModal, setShowOfficialReportModal] = useState<boolean>(false);
   const [kioskSession, setKioskSession] = useState<CheckInSession | undefined>(undefined);
   const [kioskClassId, setKioskClassId] = useState<string | undefined>(undefined);
-  const [selectedClassId, setSelectedClassId] = useState<string>('class-7a');
+  const [kioskStudentId, setKioskStudentId] = useState<string | undefined>(undefined);
+  const [selectedClassId, setSelectedClassId] = useState<string>('');
   const [selectedSessionForAnalytics, setSelectedSessionForAnalytics] = useState<CheckInSession | null>(null);
   const [showToolkitModal, setShowToolkitModal] = useState<boolean>(false);
   const [toolkitTool, setToolkitTool] = useState<'breathing' | 'brain_gym' | 'verbal'>('breathing');
@@ -101,7 +102,7 @@ export default function App() {
             return savedClass;
           }
           const exists = res.classes.some((c: any) => c.id === prev);
-          return exists ? prev : res.classes[0].id;
+          return exists && prev ? prev : (res.classes[0]?.id || '');
         });
       }
     } catch (err) {
@@ -134,6 +135,10 @@ export default function App() {
     await api.logout();
     setIsAuthenticated(false);
     setCurrentTeacher(null);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('emotion_selected_class');
+    }
+    setSelectedClassId('');
   };
 
   const handleUpdateProfile = async (profileData: any) => {
@@ -297,6 +302,7 @@ export default function App() {
           <StudentKioskModal
             session={kioskSession || data.sessions[0]}
             initialClassId={kioskClassId || selectedClassId}
+            initialStudentId={kioskStudentId}
             allSessions={data.sessions}
             students={data.students}
             classes={data.classes}
@@ -305,6 +311,7 @@ export default function App() {
             onClose={() => {
               setShowKioskModal(false);
               setKioskClassId(undefined);
+              setKioskStudentId(undefined);
             }}
             onSubmitCheckIn={handleSubmitCheckIn}
             onMarkAbsent={handleMarkAbsent}
@@ -362,248 +369,249 @@ export default function App() {
       <div className="flex-1 h-screen overflow-y-auto overflow-x-hidden min-w-0 flex flex-col">
         <main className="flex-1 p-3 sm:p-5 lg:p-6 space-y-5 max-w-7xl w-full mx-auto">
           {/* Top Header */}
-        <Header
-          title={
-            currentTab === 'dashboard'
-              ? 'Қош келдіңіз!'
-              : currentTab === 'sessions'
-              ? 'Тапсырмалар мен Сессиялар'
-              : currentTab === 'ai-insights'
-              ? 'AI Педагогикалық Аналитика (Gemini)'
-              : currentTab === 'analytics'
-              ? 'Бағалар мен Зерттеу Аналитикасы'
-              : currentTab === 'students'
-              ? 'Оқушылар мен Сыныптар'
-              : currentTab === 'notifications'
-              ? 'Ескертулер мен Хабарламалар'
-              : 'Жүйелік Баптаулар'
-          }
-          subtitle={
-            currentTab === 'dashboard'
-              ? 'Мұғалім панелінің шолуы'
-              : currentTab === 'ai-insights'
-              ? 'Gemini API арқылы апталық Қолдау Индексінің трендтерін талдау және табиғи тілдегі қорытынды'
-              : 'Emotion Check-in ғылыми-педагогикалық басқару ортасы'
-          }
-          classes={data.classes}
-          selectedClassId={selectedClassId}
-          onSelectClass={setSelectedClassId}
-          showClassSelector={currentTab !== 'dashboard'}
-          onOpenKiosk={() => {
-            setKioskSession(activeSessions[0] || data.sessions[0]);
-            setShowKioskModal(true);
-          }}
-          onResetDemo={handleResetDemo}
-          onOpenSmartGrouping={() => setShowSmartGroupingModal(true)}
-          onOpenOfficialReport={() => setShowOfficialReportModal(true)}
-          teacher={currentTeacher || data.teacher}
-          onLogout={handleLogout}
-        />
+          <Header
+            title={
+              currentTab === 'dashboard'
+                ? 'Қош келдіңіз!'
+                : currentTab === 'sessions'
+                  ? 'Тапсырмалар мен Сессиялар'
+                  : currentTab === 'ai-insights'
+                    ? 'AI Педагогикалық Аналитика (Gemini)'
+                    : currentTab === 'analytics'
+                      ? 'Бағалар мен Зерттеу Аналитикасы'
+                      : currentTab === 'students'
+                        ? 'Оқушылар мен Сыныптар'
+                        : currentTab === 'notifications'
+                          ? 'Ескертулер мен Хабарламалар'
+                          : 'Жүйелік Баптаулар'
+            }
+            subtitle={
+              currentTab === 'dashboard'
+                ? 'Мұғалім панелінің шолуы'
+                : currentTab === 'ai-insights'
+                  ? 'Gemini API арқылы апталық Қолдау Индексінің трендтерін талдау және табиғи тілдегі қорытынды'
+                  : 'Emotion Check-in ғылыми-педагогикалық басқару ортасы'
+            }
+            classes={data.classes}
+            selectedClassId={selectedClassId}
+            onSelectClass={setSelectedClassId}
+            showClassSelector={currentTab !== 'dashboard'}
+            onOpenKiosk={() => {
+              setKioskSession(activeSessions[0] || data.sessions[0]);
+              setShowKioskModal(true);
+            }}
+            onResetDemo={handleResetDemo}
+            onOpenSmartGrouping={() => setShowSmartGroupingModal(true)}
+            onOpenOfficialReport={() => setShowOfficialReportModal(true)}
+            teacher={currentTeacher || data.teacher}
+            onLogout={handleLogout}
+          />
 
-        {/* Highlight Banner: 5-деңгейлі карта & алгоритм Quick Banner */}
-        <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 rounded-3xl p-4 sm:p-5 text-white shadow-md shadow-blue-500/15 flex flex-col xl:flex-row xl:items-center justify-between gap-4">
-          <div className="space-y-1 min-w-0 flex-1">
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full bg-white/20 text-white text-[11px] font-bold uppercase tracking-wider backdrop-blur-xs">
-                Негізгі әдістемелік өнім
-              </span>
-              <span className="text-blue-100 text-xs font-medium">60 секундта анықтау</span>
+          {/* Highlight Banner: 5-деңгейлі карта & алгоритм Quick Banner */}
+          <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 rounded-3xl p-4 sm:p-5 text-white shadow-md shadow-blue-500/15 flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+            <div className="space-y-1 min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <span className="px-2.5 py-0.5 rounded-full bg-white/20 text-white text-[11px] font-bold uppercase tracking-wider backdrop-blur-xs">
+                  Негізгі әдістемелік өнім
+                </span>
+                <span className="text-blue-100 text-xs font-medium">60 секундта анықтау</span>
+              </div>
+              <h3 className="text-base sm:text-lg font-extrabold text-white leading-tight">
+                5 деңгейлі Emotion Check-in картасы + Мұғалім әрекетінің алгоритмі
+              </h3>
+              <p className="text-xs text-blue-100 leading-relaxed max-w-2xl">
+                Оқушының сабақ алдындағы эмоционалдық күйін 60 секундта анықтап, инклюзивті орта құру және сабақ тиімділігін 30-40%-ға арттыру. Смартфонсыз сыныптар үшін ортақ планшет немесе қағаз карталар қарастырылған.
+              </p>
             </div>
-            <h3 className="text-base sm:text-lg font-extrabold text-white leading-tight">
-              5 деңгейлі Emotion Check-in картасы + Мұғалім әрекетінің алгоритмі
-            </h3>
-            <p className="text-xs text-blue-100 leading-relaxed max-w-2xl">
-              Оқушының сабақ алдындағы эмоционалдық күйін 60 секундта анықтап, инклюзивті орта құру және сабақ тиімділігін 30-40%-ға арттыру. Смартфонсыз сыныптар үшін ортақ планшет немесе қағаз карталар қарастырылған.
-            </p>
+
+            <div className="flex items-center flex-wrap gap-2 shrink-0">
+              <button
+                onClick={() => setShowMatrixModal(true)}
+                className="px-3.5 sm:px-4 py-2 sm:py-2.5 bg-white hover:bg-blue-50 text-blue-700 font-extrabold text-xs rounded-xl shadow-xs transition-colors flex items-center gap-1.5"
+              >
+                <Layers className="w-4 h-4 text-blue-600" />
+                <span>5 деңгейлі картаны ашу</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setToolkitTool('breathing');
+                  setShowToolkitModal(true);
+                }}
+                className="px-3 sm:px-3.5 py-2 sm:py-2.5 bg-blue-500/40 hover:bg-blue-500/60 border border-white/20 text-white font-bold text-xs rounded-xl transition-colors flex items-center gap-1.5"
+              >
+                <Sparkles className="w-4 h-4 text-amber-300" />
+                <span>«4-7-8» Тыныс алу таймері</span>
+              </button>
+            </div>
           </div>
 
-          <div className="flex items-center flex-wrap gap-2 shrink-0">
-            <button
-              onClick={() => setShowMatrixModal(true)}
-              className="px-3.5 sm:px-4 py-2 sm:py-2.5 bg-white hover:bg-blue-50 text-blue-700 font-extrabold text-xs rounded-xl shadow-xs transition-colors flex items-center gap-1.5"
-            >
-              <Layers className="w-4 h-4 text-blue-600" />
-              <span>5 деңгейлі картаны ашу</span>
-            </button>
+          {/* Tab 1: Dashboard */}
+          {currentTab === 'dashboard' && (
+            <div className="space-y-6">
+              {/* Top 4 Stats Cards matching reference image */}
+              <StatsCards
+                totalStudents={totalStudentsCount}
+                classesCount={data.classes.length}
+                activeTasksCount={activeSessions.length}
+                completedChecksCount={totalCheckInsCount}
+                averageScore={avgScore}
+                supportIndex={primarySupportIndex}
+              />
 
-            <button
-              onClick={() => {
+              {/* 10-Step Interactive Workflow */}
+              <WorkflowStepper onStepClick={handleWorkflowStep} />
+
+              {/* 30-Day Longitudinal Recharts Data Visualization */}
+              <SupportIndexTrendChart
+                classes={data.classes}
+                sessions={data.sessions}
+                selectedClassId={selectedClassId}
+              />
+
+              {/* Active Sessions List matching screenshot bottom */}
+              <ActiveSessionsList
+                sessions={data.sessions}
+                classes={data.classes}
+                onSelectSession={(sess) => setSelectedSessionForAnalytics(sess)}
+                onStartRecheck={handleStartRecheck}
+                onOpenKioskForSession={(sess) => {
+                  setKioskSession(sess);
+                  setShowKioskModal(true);
+                }}
+                onOpenKioskForClass={(clsId) => {
+                  const sess = data.sessions.find((s) => s.classId === clsId) || data.sessions[0];
+                  setKioskSession(sess);
+                  setShowKioskModal(true);
+                }}
+                onOpenTeacherAlgorithm={(sess) => {
+                  setSelectedSessionForAnalytics(sess);
+                }}
+                onOpenPdfTips={handleOpenPdfTips}
+              />
+            </div>
+          )}
+
+          {/* Tab 2: Sessions */}
+          {currentTab === 'sessions' && (
+            <div className="space-y-4">
+              <ActiveSessionsList
+                sessions={data.sessions}
+                classes={data.classes}
+                selectedClassId={selectedClassId}
+                onSelectClass={setSelectedClassId}
+                onSelectSession={(sess) => setSelectedSessionForAnalytics(sess)}
+                onStartRecheck={handleStartRecheck}
+                onOpenKioskForSession={(sess) => {
+                  setKioskSession(sess);
+                  setKioskClassId(sess.classId);
+                  setShowKioskModal(true);
+                }}
+                onOpenKioskForClass={(clsId) => {
+                  const sess = data.sessions.find((s) => s.classId === clsId) || data.sessions[0];
+                  setKioskSession(sess);
+                  setKioskClassId(clsId);
+                  setShowKioskModal(true);
+                }}
+                onOpenTeacherAlgorithm={(sess) => setSelectedSessionForAnalytics(sess)}
+                onOpenPdfTips={handleOpenPdfTips}
+              />
+            </div>
+          )}
+
+          {/* Tab 3: Grades & Research Analytics */}
+          {currentTab === 'analytics' && (
+            <GradesAndResearchAnalyticsView
+              classes={data.classes}
+              students={data.students}
+              sessions={data.sessions}
+              checkIns={data.checkIns}
+              levels={data.emotionLevels}
+              selectedClassId={selectedClassId}
+              onSelectClass={setSelectedClassId}
+              onUpdateGrade={handleUpdateGrade}
+              onSelectSessionForAnalytics={(sess) => setSelectedSessionForAnalytics(sess)}
+              onOpenBreathingTimer={() => {
                 setToolkitTool('breathing');
                 setShowToolkitModal(true);
               }}
-              className="px-3 sm:px-3.5 py-2 sm:py-2.5 bg-blue-500/40 hover:bg-blue-500/60 border border-white/20 text-white font-bold text-xs rounded-xl transition-colors flex items-center gap-1.5"
-            >
-              <Sparkles className="w-4 h-4 text-amber-300" />
-              <span>«4-7-8» Тыныс алу таймері</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Tab 1: Dashboard */}
-        {currentTab === 'dashboard' && (
-          <div className="space-y-6">
-            {/* Top 4 Stats Cards matching reference image */}
-            <StatsCards
-              totalStudents={totalStudentsCount}
-              classesCount={data.classes.length}
-              activeTasksCount={activeSessions.length}
-              completedChecksCount={totalCheckInsCount}
-              averageScore={avgScore}
-              supportIndex={primarySupportIndex}
+              onOpenBrainGym={() => {
+                setToolkitTool('brain_gym');
+                setShowToolkitModal(true);
+              }}
+              initialSessionAId={comparisonSessionA}
+              initialSessionBId={comparisonSessionB}
             />
+          )}
 
-            {/* 10-Step Interactive Workflow */}
-            <WorkflowStepper onStepClick={handleWorkflowStep} />
-
-            {/* 30-Day Longitudinal Recharts Data Visualization */}
-            <SupportIndexTrendChart
+          {/* Tab: AI Insights */}
+          {currentTab === 'ai-insights' && (
+            <AIInsightsView
               classes={data.classes}
               sessions={data.sessions}
-            />
-
-            {/* Active Sessions List matching screenshot bottom */}
-            <ActiveSessionsList
-              sessions={data.sessions}
-              classes={data.classes}
-              onSelectSession={(sess) => setSelectedSessionForAnalytics(sess)}
-              onStartRecheck={handleStartRecheck}
-              onOpenKioskForSession={(sess) => {
-                setKioskSession(sess);
-                setShowKioskModal(true);
-              }}
-              onOpenKioskForClass={(clsId) => {
-                const sess = data.sessions.find((s) => s.classId === clsId) || data.sessions[0];
-                setKioskSession(sess);
-                setShowKioskModal(true);
-              }}
-              onOpenTeacherAlgorithm={(sess) => {
-                setSelectedSessionForAnalytics(sess);
-              }}
-              onOpenPdfTips={handleOpenPdfTips}
-            />
-          </div>
-        )}
-
-        {/* Tab 2: Sessions */}
-        {currentTab === 'sessions' && (
-          <div className="space-y-4">
-            <ActiveSessionsList
-              sessions={data.sessions}
-              classes={data.classes}
               selectedClassId={selectedClassId}
               onSelectClass={setSelectedClassId}
-              onSelectSession={(sess) => setSelectedSessionForAnalytics(sess)}
-              onStartRecheck={handleStartRecheck}
-              onOpenKioskForSession={(sess) => {
-                setKioskSession(sess);
-                setKioskClassId(sess.classId);
-                setShowKioskModal(true);
+              onOpenBreathingTimer={() => {
+                setToolkitTool('breathing');
+                setShowToolkitModal(true);
               }}
+              onOpenBrainGym={() => {
+                setToolkitTool('brain_gym');
+                setShowToolkitModal(true);
+              }}
+              onSendNotification={handleSendNotification}
+            />
+          )}
+
+          {/* Tab 4: Students & Classes */}
+          {currentTab === 'students' && (
+            <ClassManagement
+              classes={data.classes}
+              students={data.students}
+              selectedClassId={selectedClassId}
+              onSelectClass={setSelectedClassId}
+              onAddClass={handleAddClass}
+              onAddStudent={handleAddStudent}
+              onDeleteClass={handleDeleteClass}
+              onDeleteStudent={handleDeleteStudent}
+              onOpenPrintCards={() => setShowPrintCardsModal(true)}
               onOpenKioskForClass={(clsId) => {
                 const sess = data.sessions.find((s) => s.classId === clsId) || data.sessions[0];
                 setKioskSession(sess);
                 setKioskClassId(clsId);
                 setShowKioskModal(true);
               }}
-              onOpenTeacherAlgorithm={(sess) => setSelectedSessionForAnalytics(sess)}
-              onOpenPdfTips={handleOpenPdfTips}
             />
-          </div>
-        )}
+          )}
 
-        {/* Tab 3: Grades & Research Analytics */}
-        {currentTab === 'analytics' && (
-          <GradesAndResearchAnalyticsView
-            classes={data.classes}
-            students={data.students}
-            sessions={data.sessions}
-            checkIns={data.checkIns}
-            levels={data.emotionLevels}
-            selectedClassId={selectedClassId}
-            onSelectClass={setSelectedClassId}
-            onUpdateGrade={handleUpdateGrade}
-            onSelectSessionForAnalytics={(sess) => setSelectedSessionForAnalytics(sess)}
-            onOpenBreathingTimer={() => {
-              setToolkitTool('breathing');
-              setShowToolkitModal(true);
-            }}
-            onOpenBrainGym={() => {
-              setToolkitTool('brain_gym');
-              setShowToolkitModal(true);
-            }}
-            initialSessionAId={comparisonSessionA}
-            initialSessionBId={comparisonSessionB}
-          />
-        )}
+          {/* Tab 5: Notifications */}
+          {currentTab === 'notifications' && (
+            <NotificationsView
+              notifications={data.notifications}
+              classes={data.classes}
+              onMarkRead={handleMarkNotificationRead}
+              onSendNotification={handleSendNotification}
+            />
+          )}
 
-        {/* Tab: AI Insights */}
-        {currentTab === 'ai-insights' && (
-          <AIInsightsView
-            classes={data.classes}
-            sessions={data.sessions}
-            selectedClassId={selectedClassId}
-            onSelectClass={setSelectedClassId}
-            onOpenBreathingTimer={() => {
-              setToolkitTool('breathing');
-              setShowToolkitModal(true);
-            }}
-            onOpenBrainGym={() => {
-              setToolkitTool('brain_gym');
-              setShowToolkitModal(true);
-            }}
-            onSendNotification={handleSendNotification}
-          />
-        )}
-
-        {/* Tab 4: Students & Classes */}
-        {currentTab === 'students' && (
-          <ClassManagement
-            classes={data.classes}
-            students={data.students}
-            selectedClassId={selectedClassId}
-            onSelectClass={setSelectedClassId}
-            onAddClass={handleAddClass}
-            onAddStudent={handleAddStudent}
-            onDeleteClass={handleDeleteClass}
-            onDeleteStudent={handleDeleteStudent}
-            onOpenPrintCards={() => setShowPrintCardsModal(true)}
-            onOpenKioskForClass={(clsId) => {
-              const sess = data.sessions.find((s) => s.classId === clsId) || data.sessions[0];
-              setKioskSession(sess);
-              setKioskClassId(clsId);
-              setShowKioskModal(true);
-            }}
-          />
-        )}
-
-        {/* Tab 5: Notifications */}
-        {currentTab === 'notifications' && (
-          <NotificationsView
-            notifications={data.notifications}
-            classes={data.classes}
-            onMarkRead={handleMarkNotificationRead}
-            onSendNotification={handleSendNotification}
-          />
-        )}
-
-        {/* Tab 6: Settings */}
-        {currentTab === 'settings' && (
-          <SettingsView
-            teacher={currentTeacher || data.teacher}
-            onUpdateTeacher={handleUpdateTeacher}
-            onUpdateProfile={handleUpdateProfile}
-            onResetDemo={handleResetDemo}
-            onOpenKiosk={() => {
-              setKioskSession(activeSessions[0] || data.sessions[0]);
-              setShowKioskModal(true);
-            }}
-            onOpenMatrix={() => setShowMatrixModal(true)}
-            onOpenPrintCards={() => setShowPrintCardsModal(true)}
-            onOpenSmartGrouping={() => setShowSmartGroupingModal(true)}
-            onOpenOfficialReport={() => setShowOfficialReportModal(true)}
-          />
-        )}
-      </main>
+          {/* Tab 6: Settings */}
+          {currentTab === 'settings' && (
+            <SettingsView
+              teacher={currentTeacher || data.teacher}
+              onUpdateTeacher={handleUpdateTeacher}
+              onUpdateProfile={handleUpdateProfile}
+              onResetDemo={handleResetDemo}
+              onOpenKiosk={() => {
+                setKioskSession(activeSessions[0] || data.sessions[0]);
+                setShowKioskModal(true);
+              }}
+              onOpenMatrix={() => setShowMatrixModal(true)}
+              onOpenPrintCards={() => setShowPrintCardsModal(true)}
+              onOpenSmartGrouping={() => setShowSmartGroupingModal(true)}
+              onOpenOfficialReport={() => setShowOfficialReportModal(true)}
+            />
+          )}
+        </main>
       </div>
 
       {/* MODALS */}
@@ -630,6 +638,7 @@ export default function App() {
         <StudentKioskModal
           session={kioskSession}
           initialClassId={kioskClassId || selectedClassId}
+          initialStudentId={kioskStudentId}
           allSessions={data.sessions}
           students={data.students}
           classes={data.classes}
@@ -638,10 +647,15 @@ export default function App() {
           onClose={() => {
             setShowKioskModal(false);
             setKioskClassId(undefined);
+            setKioskStudentId(undefined);
           }}
           onSubmitCheckIn={handleSubmitCheckIn}
           onMarkAbsent={handleMarkAbsent}
           onFinalizeAbsent={handleFinalizeAbsent}
+          onOpenTeacherAnalytics={(sess) => {
+            setShowKioskModal(false);
+            setSelectedSessionForAnalytics(sess);
+          }}
         />
       )}
 
@@ -687,7 +701,16 @@ export default function App() {
           classes={data.classes}
           students={data.students}
           levels={data.emotionLevels}
+          initialClassId={selectedClassId}
           onClose={() => setShowPrintCardsModal(false)}
+          onStartCheckInForStudent={(student) => {
+            setShowPrintCardsModal(false);
+            const sess = data.sessions.find((s) => s.classId === student.classId) || data.sessions[0];
+            setKioskSession(sess);
+            setKioskClassId(student.classId);
+            setKioskStudentId(student.id);
+            setShowKioskModal(true);
+          }}
         />
       )}
 

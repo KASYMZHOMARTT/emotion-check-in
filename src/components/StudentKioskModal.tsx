@@ -15,7 +15,11 @@ import {
   RotateCcw,
   Check,
   Maximize2,
-  Minimize2
+  Minimize2,
+  Lock,
+  Eye,
+  ShieldCheck,
+  BarChart3
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { CheckInSession, Student, EmotionLevelConfig, SchoolClass, CheckInRecord } from '../types';
@@ -23,6 +27,7 @@ import { CheckInSession, Student, EmotionLevelConfig, SchoolClass, CheckInRecord
 interface StudentKioskModalProps {
   session?: CheckInSession;
   initialClassId?: string;
+  initialStudentId?: string;
   allSessions: CheckInSession[];
   students: Student[];
   classes?: SchoolClass[];
@@ -42,11 +47,13 @@ interface StudentKioskModalProps {
   }) => Promise<any>;
   onMarkAbsent?: (data: { sessionId: string; studentId: string }) => Promise<any>;
   onFinalizeAbsent?: (sessionId: string) => Promise<any>;
+  onOpenTeacherAnalytics?: (session: CheckInSession) => void;
 }
 
 export const StudentKioskModal: React.FC<StudentKioskModalProps> = ({
   session,
   initialClassId,
+  initialStudentId,
   allSessions,
   students,
   classes = [],
@@ -55,13 +62,19 @@ export const StudentKioskModal: React.FC<StudentKioskModalProps> = ({
   onClose,
   onSubmitCheckIn,
   onMarkAbsent,
-  onFinalizeAbsent
+  onFinalizeAbsent,
+  onOpenTeacherAnalytics
 }) => {
   const activeSession = session || allSessions.find((s) => s.status === 'active') || allSessions[0];
   
+  // Privacy mode: by default FALSE, so students CANNOT see emotion levels/emojis!
+  // Only the teacher can toggle this to view the emotional levels on this screen.
+  const [isTeacherMode, setIsTeacherMode] = useState<boolean>(false);
+  const [privacyNoticeToast, setPrivacyNoticeToast] = useState<string | null>(null);
+
   // Selected class
   const [selectedClassId, setSelectedClassId] = useState<string>(
-    initialClassId || session?.classId || activeSession?.classId || classes[0]?.id || 'class-9a'
+    initialClassId || session?.classId || activeSession?.classId || classes[0]?.id || ''
   );
 
   useEffect(() => {
@@ -71,6 +84,15 @@ export const StudentKioskModal: React.FC<StudentKioskModalProps> = ({
       setSelectedClassId(session.classId);
     }
   }, [initialClassId, session?.classId]);
+
+  useEffect(() => {
+    if (initialStudentId) {
+      const target = students.find((s) => s.id === initialStudentId);
+      if (target) {
+        handleSelectStudent(target);
+      }
+    }
+  }, [initialStudentId]);
 
   // Kiosk step: 'select_student' -> 'checkin' -> 'success'
   const [step, setStep] = useState<'select_student' | 'checkin' | 'success'>('select_student');
@@ -282,6 +304,45 @@ export const StudentKioskModal: React.FC<StudentKioskModalProps> = ({
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
+            {step === 'select_student' && (
+              <button
+                type="button"
+                onClick={() => setIsTeacherMode(!isTeacherMode)}
+                className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer border shadow-2xs ${
+                  isTeacherMode
+                    ? 'bg-amber-100 hover:bg-amber-200 text-amber-900 border-amber-300'
+                    : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-200'
+                }`}
+                title={isTeacherMode ? 'Оқушыларға деңгейлерді жасыру режиміне ауысу' : 'Мұғалім режимі: Деңгейлерді көру'}
+              >
+                {isTeacherMode ? (
+                  <>
+                    <Eye className="w-3.5 h-3.5 text-amber-700" />
+                    <span className="hidden sm:inline">Мұғалім көрінісі (Деңгейлер ашық)</span>
+                    <span className="sm:hidden">Мұғалім режимі</span>
+                  </>
+                ) : (
+                  <>
+                    <Lock className="w-3.5 h-3.5 text-emerald-600" />
+                    <span className="hidden sm:inline">Оқушылар режимі (Деңгейлер жасырулы)</span>
+                    <span className="sm:hidden">Құпия режим</span>
+                  </>
+                )}
+              </button>
+            )}
+
+            {step === 'select_student' && isTeacherMode && onOpenTeacherAnalytics && activeSessionForClass && (
+              <button
+                type="button"
+                onClick={() => onOpenTeacherAnalytics(activeSessionForClass)}
+                className="px-3 py-1.5 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-xl transition-colors hidden md:flex items-center gap-1 cursor-pointer"
+                title="Мұғалімнің толық сессия аналитикасын ашу"
+              >
+                <BarChart3 className="w-3.5 h-3.5 text-blue-600" />
+                <span>Толық аналитика</span>
+              </button>
+            )}
+
             {step !== 'select_student' && (
               <button
                 onClick={handleReturnToStudentList}
@@ -310,6 +371,22 @@ export const StudentKioskModal: React.FC<StudentKioskModalProps> = ({
           </div>
         </div>
 
+        {/* Privacy Toast Notification */}
+        {privacyNoticeToast && (
+          <div className="mx-4 sm:mx-6 mt-3 bg-slate-900 text-white px-4 py-2.5 rounded-2xl shadow-xl border border-slate-700 flex items-center justify-between gap-3 text-xs animate-in fade-in slide-in-from-top-2">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>{privacyNoticeToast}</span>
+            </div>
+            <button
+              onClick={() => setPrivacyNoticeToast(null)}
+              className="text-slate-400 hover:text-white text-xs cursor-pointer"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
+
         {/* ================= STEP 1: STUDENT SELECTION SCREEN ================= */}
         {step === 'select_student' && (
           <div className="p-5 sm:p-6 overflow-y-auto space-y-5 flex-1">
@@ -337,11 +414,19 @@ export const StudentKioskModal: React.FC<StudentKioskModalProps> = ({
                   </select>
                 </div>
                 <h4 className="text-xl font-extrabold text-white">
-                  {classes.find((c) => c.id === selectedClassId)?.name || '9 «А» сыныбы'}
+                  {classes.find((c) => c.id === selectedClassId)?.name || classes[0]?.name || 'Сынып'}
                 </h4>
                 <p className="text-xs text-blue-100">
                   Оқушылар кезекпен келіп өз атын басып, 60 секундта көңіл-күйін белгілейді
                 </p>
+                <div className="flex items-center gap-1.5 text-[11px] font-semibold text-blue-200 pt-0.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-300 shrink-0" />
+                  <span>
+                    {isTeacherMode
+                      ? 'Мұғалім көрінісі белсенді (Деңгейлер тек мұғалімге көрініп тұр)'
+                      : 'Құпиялылық қорғалған: Оқушылар бір-бірінің деңгейін көрмейді (Тек мұғалімге көрінеді)'}
+                  </span>
+                </div>
               </div>
 
               {/* Counter Pill */}
@@ -359,6 +444,30 @@ export const StudentKioskModal: React.FC<StudentKioskModalProps> = ({
                 )}
               </div>
             </div>
+
+            {/* Teacher Mode Alert Banner */}
+            {isTeacherMode && (
+              <div className="bg-amber-50 border border-amber-300 rounded-2xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-2xs">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-8 h-8 rounded-xl bg-amber-200 text-amber-900 flex items-center justify-center shrink-0">
+                    <Eye className="w-4.5 h-4.5" />
+                  </div>
+                  <div>
+                    <p className="font-extrabold text-amber-950">Мұғалім режимі белсенді (Деңгейлер ашық)</p>
+                    <p className="text-amber-800 text-[11px]">
+                      Оқушылардың жеке деңгейлері мен смайликтері экранда көрініп тұр. Оқушыларға экранды берер алдында міндетті түрде «Оқушылар режиміне» ауыстырыңыз.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsTeacherMode(false)}
+                  className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 active:scale-95 text-white rounded-xl text-xs font-bold transition-colors shrink-0 cursor-pointer self-start sm:self-center"
+                >
+                  Оқушыларға жасыру
+                </button>
+              </div>
+            )}
 
             {/* Search Box */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -390,7 +499,17 @@ export const StudentKioskModal: React.FC<StudentKioskModalProps> = ({
                   <div
                     key={st.id}
                     onClick={() => {
-                      if (!isAbsent) {
+                      if (isAbsent) return;
+                      if (checked) {
+                        if (!isTeacherMode) {
+                          setPrivacyNoticeToast(
+                            `«${st.name}» бұл сауалнамадан өткен. Құпиялылық үшін жауаптары басқаларға көрсетілмейді (тек мұғалімге көрінеді).`
+                          );
+                          setTimeout(() => setPrivacyNoticeToast(null), 3500);
+                          return;
+                        }
+                        handleSelectStudent(st);
+                      } else {
                         handleSelectStudent(st);
                       }
                     }}
@@ -398,7 +517,9 @@ export const StudentKioskModal: React.FC<StudentKioskModalProps> = ({
                       checked
                         ? isAbsent
                           ? 'bg-slate-50/90 border-slate-200 opacity-90'
-                          : 'bg-blue-50/80 border-blue-200/90 hover:border-blue-400 hover:bg-blue-50 cursor-pointer'
+                          : isTeacherMode
+                            ? 'bg-blue-50/80 border-blue-200/90 hover:border-blue-400 hover:bg-blue-50 cursor-pointer'
+                            : 'bg-emerald-50/50 border-emerald-200/80 hover:border-emerald-300 hover:bg-emerald-50/80 cursor-default'
                         : 'bg-white border-slate-200/90 hover:border-blue-400 hover:bg-blue-50/30 hover:shadow-xs cursor-pointer'
                     }`}
                   >
@@ -408,12 +529,20 @@ export const StudentKioskModal: React.FC<StudentKioskModalProps> = ({
                           checked
                             ? isAbsent
                               ? 'bg-slate-200 text-slate-600'
-                              : 'bg-blue-600 text-white shadow-blue-500/25'
+                              : isTeacherMode
+                                ? 'bg-blue-600 text-white shadow-blue-500/25'
+                                : 'bg-emerald-100 text-emerald-700 border border-emerald-200/90'
                             : 'bg-blue-100/80 text-blue-700 font-extrabold'
                         }`}
                       >
                         {checked ? (
-                          isAbsent ? '❌' : (levelConfig?.emoji || '✓')
+                          isAbsent ? (
+                            '❌'
+                          ) : isTeacherMode ? (
+                            levelConfig?.emoji || '✓'
+                          ) : (
+                            <Check className="w-5 h-5 text-emerald-600 stroke-[2.5]" />
+                          )
                         ) : (
                           st.name.charAt(0)
                         )}
@@ -427,10 +556,15 @@ export const StudentKioskModal: React.FC<StudentKioskModalProps> = ({
                           {checked ? (
                             isAbsent ? (
                               <span className="text-amber-700 font-bold">Сабақта жоқ (Өтпеді)</span>
-                            ) : (
+                            ) : isTeacherMode ? (
                               <span className="text-blue-700 font-bold flex items-center gap-1">
                                 <Check className="w-3 h-3 text-blue-600 shrink-0" />
                                 <span>{levelConfig?.nameKz ? levelConfig.nameKz.split(':')[0] : 'Тексерілді'}</span>
+                              </span>
+                            ) : (
+                              <span className="text-emerald-700 font-bold flex items-center gap-1">
+                                <Check className="w-3 h-3 text-emerald-600 shrink-0" />
+                                <span>Сауалнама өтті</span>
                               </span>
                             )
                           ) : (
@@ -447,8 +581,12 @@ export const StudentKioskModal: React.FC<StudentKioskModalProps> = ({
                             Өтпеді
                           </span>
                         ) : (
-                          <span className="px-2.5 py-1.5 rounded-xl text-xs font-black bg-blue-100 text-blue-700 border border-blue-200 flex items-center gap-1">
-                            <Check className="w-3.5 h-3.5 text-blue-600" />
+                          <span className={`px-2.5 py-1.5 rounded-xl text-xs font-black border flex items-center gap-1 ${
+                            isTeacherMode
+                              ? 'bg-blue-100 text-blue-700 border-blue-200'
+                              : 'bg-emerald-100/90 text-emerald-800 border-emerald-200'
+                          }`}>
+                            <Check className="w-3.5 h-3.5" />
                             <span>Өтті</span>
                           </span>
                         )
@@ -719,8 +857,12 @@ export const StudentKioskModal: React.FC<StudentKioskModalProps> = ({
                 Рахмет, {currentStudent.name}!
               </h4>
               <p className="text-sm text-slate-600">
-                Көңіл-күйіңіз сақталды. Сабақта сәттілік тілейміз!
+                Көңіл-күйіңіз сәтті тіркелді. Сабақта сәттілік тілейміз!
               </p>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-full text-[11px] font-bold mt-1">
+                <Lock className="w-3 h-3 text-emerald-600" />
+                <span>Жауабыңыз тек мұғалімге көрінеді (Құпия сақталды)</span>
+              </div>
             </div>
 
             <div 

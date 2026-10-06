@@ -56,7 +56,7 @@ export const GradesAndResearchAnalyticsView: React.FC<GradesAndResearchAnalytics
   initialSessionBId
 }) => {
   const [activeTab, setActiveTab] = useState<'grades' | 'comparison' | 'sessions'>(initialSubTab);
-  const [localSelectedClassId, setLocalSelectedClassId] = useState<string>(classes[0]?.id || 'class-9a');
+  const [localSelectedClassId, setLocalSelectedClassId] = useState<string>(classes[0]?.id || '');
   
   const currentClassId = propsSelectedClassId && propsSelectedClassId !== 'all' 
     ? propsSelectedClassId 

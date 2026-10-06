@@ -42,9 +42,9 @@ export const PedagogicalTipsPdfModal: React.FC<PedagogicalTipsPdfModalProps> = (
 
   const currentClass = classes.find((c) => c.id === session.classId) || {
     id: session.classId,
-    name: session.className || '9 «А» сыныбы',
-    studentCount: session.totalStudents || 20,
-    room: '304 кабинет'
+    name: session.className || classes[0]?.name || 'Сынып',
+    studentCount: session.totalStudents || classes[0]?.studentCount || 0,
+    room: classes[0]?.room || 'Кабинет'
   };
 
   const urgentCount = session.urgentSupportCount || 0;

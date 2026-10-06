@@ -37,7 +37,7 @@ export const SmartGroupingModal: React.FC<SmartGroupingModalProps> = ({
   onClose
 }) => {
   const [selectedClassId, setSelectedClassId] = useState<string>(
-    initialClassId || classes[0]?.id || 'class-9a'
+    initialClassId || classes[0]?.id || ''
   );
   const [groupCount, setGroupCount] = useState<number>(4);
   const [strategy, setStrategy] = useState<'balanced' | 'pairs' | 'energy'>('balanced');
