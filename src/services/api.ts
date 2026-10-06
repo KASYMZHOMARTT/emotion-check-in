@@ -36,6 +36,10 @@ function getLocalDb(): BootstrapData {
     try {
       const parsed = JSON.parse(stored);
       if (parsed && Array.isArray(parsed.classes) && parsed.classes.length > 0) {
+        if (!parsed.teacher || parsed.teacher.name === 'Айгүл Серікқызы' || parsed.teacher.id === 'teacher-1' || parsed.teacher.id === 'teacher-demo') {
+          parsed.teacher = INITIAL_DATA.teacher;
+          saveLocalDb(parsed);
+        }
         return parsed;
       }
     } catch {}
@@ -88,10 +92,10 @@ export const api = {
       role: 'teacher'
     } : {
       id: 'teacher-demo',
-      name: credentials.email.includes('ustaz') ? 'Айгүл Серікқызы' : 'Мұғалім',
+      name: credentials.email.includes('ustaz') ? 'Қоңырбаева Әсем Жұмаділлақызы' : 'Мұғалім',
       email: credentials.email.trim(),
-      school: '№145 Абай атындағы мектеп-гимназиясы',
-      subject: 'Информатика және психология',
+      school: '145 орта мектеп',
+      subject: 'Педагог-психолог',
       role: 'teacher'
     };
 
@@ -171,7 +175,16 @@ export const api = {
     if (typeof window !== 'undefined') {
       const cached = localStorage.getItem(TEACHER_STORAGE_KEY);
       if (cached) {
-        return { user: JSON.parse(cached) };
+        try {
+          const parsed = JSON.parse(cached);
+          if (parsed && (parsed.name === 'Айгүл Серікқызы' || parsed.id === 'teacher-1' || parsed.id === 'teacher-demo')) {
+            parsed.name = INITIAL_DATA.teacher.name;
+            parsed.school = INITIAL_DATA.teacher.school;
+            parsed.subject = INITIAL_DATA.teacher.subject;
+            localStorage.setItem(TEACHER_STORAGE_KEY, JSON.stringify(parsed));
+          }
+          return { user: parsed };
+        } catch {}
       }
     }
     return { user: getLocalDb().teacher };

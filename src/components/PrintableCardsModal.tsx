@@ -22,10 +22,15 @@ export const PrintableCardsModal: React.FC<PrintableCardsModalProps> = ({
   const [selectedClassId, setSelectedClassId] = useState<string>(initialClassId || classes[0]?.id || '');
   const [cardType, setCardType] = useState<'emotion_cards' | 'student_badges'>('student_badges');
 
-  const selectedClass = classes.find((c) => c.id === selectedClassId) || classes[0] || {
-    name: classes[0]?.name || 'Сынып',
-    studentCount: classes[0]?.studentCount || 0
-  };
+  const selectedClass = classes.find((c) => c.id === selectedClassId) || classes[0] || ({
+    id: '',
+    name: 'Сынып',
+    grade: '',
+    subject: '',
+    studentCount: 0,
+    room: '',
+    schedule: ''
+  } as SchoolClass);
   const filteredStudents = students.filter((s) => s.classId === selectedClassId || (!s.classId && classes[0]?.id === selectedClassId));
 
   const handlePrint = () => {

@@ -3,10 +3,10 @@ import { BootstrapData } from '../types';
 export const INITIAL_DATA: BootstrapData = {
   teacher: {
     id: "teacher-1",
-    name: "Айгүл Серікқызы",
+    name: "Қоңырбаева Әсем Жұмаділлақызы",
     email: "ustaz@mektep.kz",
-    school: "№145 Абай атындағы мектеп-гимназиясы",
-    subject: "Информатика және психология",
+    school: "145 орта мектеп",
+    subject: "Педагог-психолог",
     role: "teacher"
   },
   classes: [

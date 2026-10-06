@@ -2,10 +2,10 @@
   "users": [
     {
       "id": "teacher-1",
-      "name": "Айгүл Серікқызы",
+      "name": "Қоңырбаева Әсем Жұмаділлақызы",
       "email": "ustaz@mektep.kz",
-      "school": "№145 Абай атындағы мектеп-гимназиясы",
-      "subject": "Информатика және психология",
+      "school": "145 орта мектеп",
+      "subject": "Педагог-психолог",
       "role": "teacher",
       "passwordHash": "b481cd82f685f8641c12665c30fc45a80484a01a4a9ff136e98162056d6f30ad9edc39fd191c71e1c6b459312c4865873b53e5aa3d733bce93aa6b875cf18016",
       "salt": "emotion_teacher_salt_2026",
@@ -68,11 +68,11 @@
     }
   ],
   "teacher": {
-    "id": "teacher-1790859155874",
-    "name": "Нұр",
-    "email": "ainur.ustaz@mektep.kz",
-    "school": "",
-    "subject": "Мұғалім",
+    "id": "teacher-1",
+    "name": "Қоңырбаева Әсем Жұмаділлақызы",
+    "email": "ustaz@mektep.kz",
+    "school": "145 орта мектеп",
+    "subject": "Педагог-психолог",
     "role": "teacher"
   },
   "classes": [
@@ -1324,6 +1324,6 @@
     }
   ],
   "tokens": {
-    "ca11b7181781bd38013939f0f7028b7af6b44c16145ed91eb1d6799082707e1b": "teacher-1790859155874"
+    "ca11b7181781bd38013939f0f7028b7af6b44c16145ed91eb1d6799082707e1b": "teacher-1"
   }
 }

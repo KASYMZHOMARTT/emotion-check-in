@@ -296,10 +296,10 @@ function getInitialData() {
 
   const defaultTeacherUser = {
     id: 'teacher-1',
-    name: 'Айгүл Серікқызы',
+    name: 'Қоңырбаева Әсем Жұмаділлақызы',
     email: 'ustaz@mektep.kz',
-    school: '№145 Абай атындағы мектеп-гимназиясы',
-    subject: 'Информатика және психология',
+    school: '145 орта мектеп',
+    subject: 'Педагог-психолог',
     role: 'teacher' as const,
     passwordHash: defaultHash,
     salt: defaultSalt,

@@ -50,9 +50,15 @@ export const OfficialReportModal: React.FC<OfficialReportModalProps> = ({
     ? Math.round(filteredSessions.reduce((acc, s) => acc + (s.supportIndex || 0), 0) / filteredSessions.length)
     : 86;
 
-  const currentTeacherName = teacher?.name || 'Айгүл Серікқызы';
-  const currentSchool = teacher?.school || '№145 Абай атындағы мектеп-гимназиясы';
-  const currentSubject = teacher?.subject || 'Информатика және психология';
+  const currentTeacherName = (!teacher?.name || teacher.name === 'Айгүл Серікқызы')
+    ? 'Қоңырбаева Әсем Жұмаділлақызы'
+    : teacher.name;
+  const currentSchool = (!teacher?.school || teacher.school.includes('Абай атындағы'))
+    ? '145 орта мектеп'
+    : teacher.school;
+  const currentSubject = (!teacher?.subject || teacher.subject === 'Информатика және психология')
+    ? 'Педагог-психолог'
+    : teacher.subject;
 
   const reportDate = new Date().toLocaleDateString('kk-KZ', {
     year: 'numeric',
@@ -113,7 +119,7 @@ export const OfficialReportModal: React.FC<OfficialReportModalProps> = ({
   };
 
   const handleCopySummary = () => {
-    const text = `ҚАЗАҚСТАН РЕСПУБЛИКАСЫ ОҚУ-АҒАРТУ МИНИСТРЛІГІ\n${currentSchool}\n\nПЕДАГОГИКАЛЫҚ-ПСИХОЛОГИЯЛЫҚ ЗЕРТТЕУ ЖӘНЕ МОНИТОРИНГ АКТІСІ\nМұғалім: ${currentTeacherName} (${currentSubject})\nКүні: ${reportDate}\nОрташа Қолдау Индексі: ${avgSupportIndex}%\nСессиялар саны: ${filteredSessions.length}\nCheck-in жазбалары: ${totalChecks}\n\nҚорытынды: «Emotion Check-in» 60 секундтық скрининг әдістемесі оқушылардың сабаққа эмоционалдық дайындығын жақсартып, инклюзивті қауіпсіз орта құруға толық мүмкіндік беретіні дәлелденді.`;
+    const text = `ҚАЗАҚСТАН РЕСПУБЛИКАСЫ ОҚУ-АҒАРТУ МИНИСТРЛІГІ\n${currentSchool}\n\nПЕДАГОГИКАЛЫҚ-ПСИХОЛОГИЯЛЫҚ ЗЕРТТЕУ ЖӘНЕ МОНИТОРИНГ АКТІСІ\nПедагог-психолог: ${currentTeacherName} (${currentSubject})\nКүні: ${reportDate}\nОрташа Қолдау Индексі: ${avgSupportIndex}%\nСессиялар саны: ${filteredSessions.length}\nCheck-in жазбалары: ${totalChecks}\n\nҚорытынды: «Emotion Check-in» 60 секундтық скрининг әдістемесі оқушылардың сабаққа эмоционалдық дайындығын жақсартып, инклюзивті қауіпсіз орта құруға толық мүмкіндік беретіні дәлелденді.`;
     navigator.clipboard.writeText(text);
     setCopiedText(true);
     setTimeout(() => setCopiedText(false), 2500);
@@ -231,7 +237,7 @@ export const OfficialReportModal: React.FC<OfficialReportModalProps> = ({
             {/* Meta Table */}
             <div className="grid grid-cols-2 gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs">
               <div>
-                <p className="text-slate-500 font-semibold">Пән мұғалімі / Зерттеуші:</p>
+                <p className="text-slate-500 font-semibold">Педагог-психолог / Зерттеуші:</p>
                 <p className="font-bold text-slate-900 text-sm mt-0.5">{currentTeacherName}</p>
                 <p className="text-slate-600 text-[11px]">{currentSubject}</p>
               </div>
@@ -248,7 +254,7 @@ export const OfficialReportModal: React.FC<OfficialReportModalProps> = ({
                 <span>1. Зерттеудің ғылыми-әдістемелік мақсаты мен нысаны</span>
               </h3>
               <p className="text-xs text-slate-700 leading-relaxed text-justify">
-                Оқушылардың сабақ алдындағы психо-эмоционалдық әл-ауқатын 60 секундта анықтау, 5 деңгейлі сигналдық карта бойынша күйзеліс пен шаршауды ерте диагностикалау және мұғалім ретінде дәлелді педагогикалық интервенция өткізу арқылы инклюзивті қауіпсіз білім беру кеңістігін қалыптастыру.
+                Оқушылардың сабақ алдындағы психо-эмоционалдық әл-ауқатын 60 секундта анықтау, 5 деңгейлі сигналдық карта бойынша күйзеліс пен шаршауды ерте диагностикалау және педагог-психолог ретінде дәлелді педагогикалық интервенция өткізу арқылы инклюзивті қауіпсіз білім беру кеңістігін қалыптастыру.
               </p>
             </div>
 
@@ -310,14 +316,14 @@ export const OfficialReportModal: React.FC<OfficialReportModalProps> = ({
                 <span>4. Ғылыми-әдістемелік қорытынды және аттестациялық ұсыныс</span>
               </div>
               <p className="text-emerald-950 leading-relaxed text-justify">
-                Мониторинг нәтижесі көрсеткендей, сабақ алдындағы 60 секундтық <b>«Emotion Check-in»</b> жүйесі оқушылардың сабаққа зейін қоюын 35%-ға көтеріп, сыныптағы күйзеліс пен тұйықталуды 80%-ға төмендетті. Бұл әдістеме мұғалімнің кезекті біліктілік санатын (Педагог-зерттеуші / Педагог-шебер) қорғауға және мектеп тәжірибесіне кеңінен енгізуге толық сәйкес келеді.
+                Мониторинг нәтижесі көрсеткендей, сабақ алдындағы 60 секундтық <b>«Emotion Check-in»</b> жүйесі оқушылардың сабаққа зейін қоюын 35%-ға көтеріп, сыныптағы күйзеліс пен тұйықталуды 80%-ға төмендетті. Бұл әдістеме педагог-психологтың кезекті біліктілік санатын (Педагог-зерттеуші / Педагог-шебер) қорғауға және мектеп тәжірибесіне кеңінен енгізуге толық сәйкес келеді.
               </p>
             </div>
 
             {/* Section 5: Signature & Official Seal Block */}
             <div className="pt-6 border-t border-slate-300 grid grid-cols-3 gap-6 items-end text-xs">
               <div className="space-y-4">
-                <p className="font-bold text-slate-800">Пән мұғалімі / Зерттеуші:</p>
+                <p className="font-bold text-slate-800">Педагог-психолог / Зерттеуші:</p>
                 <div className="border-b border-slate-400 pb-1">
                   <span className="font-medium italic text-slate-600">/ қолы / </span>
                   <span className="font-bold">{currentTeacherName}</span>
@@ -325,7 +331,7 @@ export const OfficialReportModal: React.FC<OfficialReportModalProps> = ({
               </div>
 
               <div className="space-y-4">
-                <p className="font-bold text-slate-800">Мектеп психологы:</p>
+                <p className="font-bold text-slate-800">Мектеп әкімшілігі / Оқу ісінің меңгерушісі:</p>
                 <div className="border-b border-slate-400 pb-1">
                   <span className="font-medium italic text-slate-600">/ қолы / </span>
                   <span className="font-bold">Г. М. Сұлтанова</span>

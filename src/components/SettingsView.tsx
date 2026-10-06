@@ -180,7 +180,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Мысалы: Айгүл Серікқызы"
+                placeholder="Мысалы: Қоңырбаева Әсем Жұмаділлақызы"
                 className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none"
               />
             </div>
@@ -211,7 +211,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                   type="text"
                   value={school}
                   onChange={(e) => setSchool(e.target.value)}
-                  placeholder="№145 Абай атындағы мектеп-гимназиясы"
+                  placeholder="145 орта мектеп"
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 text-sm font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 />
               </div>
@@ -227,7 +227,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                   type="text"
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
-                  placeholder="Информатика және психология"
+                  placeholder="Педагог-психолог"
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 text-sm font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 />
               </div>

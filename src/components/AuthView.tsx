@@ -202,7 +202,7 @@ export const AuthView: React.FC<AuthViewProps> = ({ onAuthSuccess, onOpenKiosk }
                 Жүйені тез көру үшін:
               </p>
               <p className="text-[11px] text-slate-400">
-                Дайын демо-мұғалім есептік жазбасымен 1-шертумен кіре аласыз
+                Дайын демо есептік жазбасымен (Қоңырбаева Әсем Жұмаділлақызы, 145 орта мектеп) 1-шертумен кіре аласыз
               </p>
             </div>
             <button
@@ -358,7 +358,7 @@ export const AuthView: React.FC<AuthViewProps> = ({ onAuthSuccess, onOpenKiosk }
                       required
                       value={regName}
                       onChange={(e) => setRegName(e.target.value)}
-                      placeholder="Мысалы: Айгүл Серікқызы"
+                      placeholder="Мысалы: Қоңырбаева Әсем Жұмаділлақызы"
                       className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-800/90 border border-slate-700 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all font-medium"
                     />
                   </div>
@@ -376,7 +376,7 @@ export const AuthView: React.FC<AuthViewProps> = ({ onAuthSuccess, onOpenKiosk }
                         type="text"
                         value={regSchool}
                         onChange={(e) => setRegSchool(e.target.value)}
-                        placeholder="Мысалы: №145 мектеп (бос қалдыруға болады)"
+                        placeholder="Мысалы: 145 орта мектеп (бос қалдыруға болады)"
                         className="w-full pl-10 pr-3 py-2.5 rounded-xl bg-slate-800/90 border border-slate-700 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all font-medium"
                       />
                     </div>
@@ -392,7 +392,7 @@ export const AuthView: React.FC<AuthViewProps> = ({ onAuthSuccess, onOpenKiosk }
                         type="text"
                         value={regSubject}
                         onChange={(e) => setRegSubject(e.target.value)}
-                        placeholder="Информатика / Психолог"
+                        placeholder="Педагог-психолог"
                         className="w-full pl-10 pr-3 py-2.5 rounded-xl bg-slate-800/90 border border-slate-700 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all font-medium"
                       />
                     </div>
