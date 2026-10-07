@@ -55,6 +55,13 @@ export const PedagogicalTipsPdfModal: React.FC<PedagogicalTipsPdfModalProps> = (
     improvementPercent: 19.1
   };
 
+  const currentTeacherName = (!teacher?.name || teacher.name === 'Айгүл Серікқызы' || teacher.name === 'Айсұлу Нұрланқызы' || teacher.name === 'Мұғалім')
+    ? 'Қоңырбаева Әсем Жұмаділлақызы'
+    : teacher.name;
+  const currentSchool = (!teacher?.school || teacher.school.includes('Абай атындағы') || teacher.school.includes('IT-лицей'))
+    ? '145 орта мектеп'
+    : teacher.school;
+
   const handleDownloadPdf = async () => {
     if (!printRef.current) return;
     setIsGeneratingPdf(true);
@@ -187,10 +194,10 @@ export const PedagogicalTipsPdfModal: React.FC<PedagogicalTipsPdfModalProps> = (
 
               <div className="text-right shrink-0 sm:border-l sm:border-slate-200 sm:pl-4 space-y-1">
                 <span className="text-xs font-bold text-slate-900 block">
-                  {teacher?.school || '№87 IT-лицейі'}
+                  {currentSchool}
                 </span>
                 <span className="text-[11px] text-slate-600 block">
-                  Педагог: {teacher?.name || 'Айсұлу Нұрланқызы'}
+                  Педагог-психолог: {currentTeacherName}
                 </span>
                 <span className="text-[10px] font-mono text-slate-400 block">
                   Күні: {session.date || new Date().toISOString().split('T')[0]}
@@ -393,7 +400,7 @@ export const PedagogicalTipsPdfModal: React.FC<PedagogicalTipsPdfModalProps> = (
             {/* Teacher Notes & Signature Section */}
             <div className="pt-4 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
               <div className="space-y-1.5">
-                <span className="font-bold text-slate-700 block">Мұғалімнің келесі сабаққа жеке ескертпесі:</span>
+                <span className="font-bold text-slate-700 block">Педагог-психологтың келесі сабаққа жеке ескертпесі:</span>
                 <div className="border border-dashed border-slate-300 rounded-xl p-3 bg-slate-50 min-h-[60px] text-slate-500 italic">
                   «1-деңгейдегі оқушыларға жеке тыныш карточка ұсынылды. Re-check кезінде сыныптың көңіл-күйі +19.1%-ға жақсарды. Келесі сабақта ми гимнастикасы жалғасады.»
                 </div>
@@ -401,8 +408,8 @@ export const PedagogicalTipsPdfModal: React.FC<PedagogicalTipsPdfModalProps> = (
 
               <div className="space-y-2 flex flex-col justify-end">
                 <div className="flex items-center justify-between border-b border-slate-300 pb-1">
-                  <span className="text-slate-500">Мұғалімнің қолы:</span>
-                  <span className="font-serif italic font-bold">А. Нұрланқызы</span>
+                  <span className="text-slate-500">Педагог-психологтың қолы:</span>
+                  <span className="font-serif italic font-bold">{currentTeacherName}</span>
                 </div>
                 <div className="flex items-center justify-between text-[11px] text-slate-400">
                   <span>Жүйе: Emotion Check-in v2.4</span>

@@ -50,13 +50,13 @@ export const OfficialReportModal: React.FC<OfficialReportModalProps> = ({
     ? Math.round(filteredSessions.reduce((acc, s) => acc + (s.supportIndex || 0), 0) / filteredSessions.length)
     : 86;
 
-  const currentTeacherName = (!teacher?.name || teacher.name === 'Айгүл Серікқызы')
+  const currentTeacherName = (!teacher?.name || teacher.name === 'Айгүл Серікқызы' || teacher.name === 'Айсұлу Нұрланқызы' || teacher.name === 'Мұғалім')
     ? 'Қоңырбаева Әсем Жұмаділлақызы'
     : teacher.name;
-  const currentSchool = (!teacher?.school || teacher.school.includes('Абай атындағы'))
+  const currentSchool = (!teacher?.school || teacher.school.includes('Абай атындағы') || teacher.school.includes('IT-лицей'))
     ? '145 орта мектеп'
     : teacher.school;
-  const currentSubject = (!teacher?.subject || teacher.subject === 'Информатика және психология')
+  const currentSubject = (!teacher?.subject || teacher.subject === 'Информатика және психология' || teacher.subject === 'Мұғалім')
     ? 'Педагог-психолог'
     : teacher.subject;
 

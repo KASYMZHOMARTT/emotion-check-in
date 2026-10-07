@@ -719,7 +719,7 @@ export default function App() {
         <PedagogicalTipsPdfModal
           session={pdfTipsSession}
           classes={data.classes}
-          teacher={data.teacher}
+          teacher={currentTeacher || data.teacher}
           levels={data.emotionLevels}
           checkIns={data.checkIns}
           onClose={() => setShowPdfTipsModal(false)}

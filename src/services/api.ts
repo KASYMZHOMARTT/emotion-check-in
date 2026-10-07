@@ -36,7 +36,7 @@ function getLocalDb(): BootstrapData {
     try {
       const parsed = JSON.parse(stored);
       if (parsed && Array.isArray(parsed.classes) && parsed.classes.length > 0) {
-        if (!parsed.teacher || parsed.teacher.name === 'Айгүл Серікқызы' || parsed.teacher.id === 'teacher-1' || parsed.teacher.id === 'teacher-demo') {
+        if (!parsed.teacher || parsed.teacher.name === 'Айгүл Серікқызы' || parsed.teacher.name === 'Айсұлу Нұрланқызы' || parsed.teacher.id === 'teacher-1' || parsed.teacher.id === 'teacher-demo') {
           parsed.teacher = INITIAL_DATA.teacher;
           saveLocalDb(parsed);
         }
@@ -177,7 +177,7 @@ export const api = {
       if (cached) {
         try {
           const parsed = JSON.parse(cached);
-          if (parsed && (parsed.name === 'Айгүл Серікқызы' || parsed.id === 'teacher-1' || parsed.id === 'teacher-demo')) {
+          if (parsed && (parsed.name === 'Айгүл Серікқызы' || parsed.name === 'Айсұлу Нұрланқызы' || parsed.id === 'teacher-1' || parsed.id === 'teacher-demo')) {
             parsed.name = INITIAL_DATA.teacher.name;
             parsed.school = INITIAL_DATA.teacher.school;
             parsed.subject = INITIAL_DATA.teacher.subject;
